@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GAMPAR - Multi Protocol RFID Converter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* All original CSS styles are preserved here for identical look and feel */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1a0f3d 50%, #0f1a2e 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated Background Elements */
+        .bg-blur {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+            animation: shift 15s ease-in-out infinite;
+        }
+
+        @keyframes shift {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(30px, -30px); }
+        }
+
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .glow {
+            text-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+            animation: glow-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes glow-pulse {
+            0%, 100% { text-shadow: 0 0 20px rgba(139, 92, 246, 0.5); }
+            50% { text-shadow: 0 0 30px rgba(59, 130, 246, 0.8); }
+        }
+
+        .card-input-wrapper {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .card-input-wrapper:focus-within {
+            transform: scale(1.02);
+        }
+
+        input[type="number"] {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(30, 41, 59, 0.8)) !important;
+            border: 2px solid transparent !important;
+            background-clip: padding-box;
+            color: #10b981 !important;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        input[type="number"]:focus {
+            border: 2px solid #8b5cf6 !important;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.3), inset 0 0 10px rgba(139, 92, 246, 0.1) !important;
+            outline: none;
+        }
+
+        input[type="number"]::placeholder {
+            color: #64748b !important;
+        }
+
+        /* Button Styles */
+        .btn-primary {
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3);
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(-1px);
+        }
+
+        /* Output Box Styles */
+        .output-container {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.8));
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .output-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #8b5cf6, transparent);
+            animation: slide 2s infinite;
+        }
+
+        @keyframes slide {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .output-container:hover {
+            border-color: rgba(139, 92, 246, 0.6);
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.15);
+            transform: translateY(-5px);
+        }
+
+        .output-label {
+            color: #94a3b8;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .output-value {
+            color: #10b981;
+            font-family: 'Courier New', monospace;
+            font-size: 1.3rem;
+            font-weight: 700;
+            background: rgba(10, 10, 15, 0.5);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border-left: 3px solid #10b981;
+            word-break: break-all;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            user-select: all;
+        }
+
+        .output-value:hover {
+            background: rgba(10, 10, 15, 0.8);
+            box-shadow: inset 0 0 10px rgba(16, 185, 129, 0.1);
+        }
+
+        .error-box {
+            background: linear-gradient(135deg, rgba(220, 38, 38, 0.2), rgba(159, 18, 57, 0.2));
+            border: 1px solid rgba(220, 38, 38, 0.5);
+            color: #fca5a5;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 500;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .success-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            animation: slideDown 0.3s ease;
+        }
+
+        .grid-responsive {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .header-glow {
+            background: linear-gradient(135deg, #8b5cf6, #6366f1, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .icon-box {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-icon {
+            display: inline-block;
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            color: white;
+            font-weight: 600;
+            margin-right: 0.75rem;
+            min-width: 2.5rem;
+            text-align: center;
+        }
+
+        .feature-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #cbd5e1;
+            font-size: 0.95rem;
+        }
+
+        .pulse {
+            animation: pulse-ring 2s infinite;
+        }
+
+        @keyframes pulse-ring {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7); }
+            50% { box-shadow: 0 0 0 15px rgba(139, 92, 246, 0); }
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(16, 185, 129, 0.05));
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .output-value {
+                font-size: 1rem;
+            }
+
+            .btn-primary {
+                font-size: 0.95rem;
+                padding: 0.875rem 1.5rem;
+            }
+
+            body {
+                padding: 1rem;
+            }
+        }
+
+        /* Copy Notification */
+        .copy-notification {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+            animation: slideIn 0.3s ease;
+            z-index: 1000;
+            display: none;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .copy-notification.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-blur"></div>
+
+    <div class="relative z-10 min-h-screen py-8 md:py-12">
+        <div class="max-w-5xl mx-auto px-4">
+            <!-- Header Section -->
+            <header class="mb-12 text-center floating">
+                <div class="mb-6">
+                    <div class="icon-box text-purple-400">
+                        <i class="fas fa-microchip"></i>
+                    </div>
+                    <h1 class="text-5xl md:text-6xl font-black header-glow mb-2">
+                        GAMPAR
+                    </h1>
+                    <p class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-blue-400 to-green-400">
+                        Ghosted Access Multi-ptotocol Proximity And RFID - Version 1.
+                    </p>
+                </div>
+                <p class="text-slate-300 max-w-2xl mx-auto leading-relaxed text-lg">
+                    <span class="text-purple-300 font-semibold">(ZKTeco Card</span> Number DEC 10 to Flipper Zero <span class="text-blue-300 font-semibold">Hex</span> EM4100)
+                    <br>
+                    <span class="text-sm text-slate-400">c0ded by XsanLahci</span>
+                </p>
+            </header>
+
+            <!-- Input Form -->
+            <div class="mb-12">
+                <form id="converter-form" class="bg-gradient-to-br from-slate-800/50 via-slate-900/50 to-slate-800/50 backdrop-blur-xl border border-purple-500/30 p-8 rounded-2xl shadow-2xl">
+                    <div class="mb-8">
+                        <label for="zk_card_input" class="block text-sm font-bold text-slate-200 mb-3 uppercase tracking-wider">
+                            <i class="fas fa-credit-card text-purple-400 mr-2"></i>
+                            Card Number Input (ZKTeco DEC-10)
+                        </label>
+                        <div class="card-input-wrapper">
+                            <input
+                                type="number"
+                                id="zk_card_input"
+                                name="zk_card_input"
+                                placeholder="example: 0012286388"
+                                class="w-full px-6 py-4 rounded-lg focus:ring-2 focus:ring-purple-500 text-base md:text-lg"
+                                required
+                                min="1"
+                                oninput="if (this.value.length > 10) this.value = this.value.slice(0, 10);"
+                            >
+                        </div>
+                        <p class="text-xs text-slate-400 mt-2 ml-1">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Maximum 10 digits. Example : 0016777215 or 16777215
+                        </p>
+                    </div>
+
+                    <div id="error-container" class="hidden">
+                         <div class="error-box mb-6">
+                             <i class="fas fa-exclamation-circle flex-shrink-0"></i>
+                             <span id="error-message"></span>
+                         </div>
+                    </div>
+
+                    <button type="submit" class="w-full btn-primary">
+                        <i class="fas fa-zap mr-2"></i>
+                        CALCULATE HEX FLIPPER ZERO
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Output Results Container -->
+            <div id="results-container" class="hidden">
+                <div class="success-badge">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    Conversion Successful!
+                </div>
+
+                <h2 class="text-3xl md:text-4xl font-black text-white mb-8 flex items-center gap-3">
+                    <span class="inline-block w-1 h-10 bg-gradient-to-b from-purple-400 to-blue-400 rounded-full"></span>
+                    Wiegand 26-Bit Conversion Results
+                </h2>
+
+                <!-- Main Output: Flipper Hex -->
+                <div class="output-container mb-8 pulse border-l-4 border-l-green-400 scale-105 shadow-2xl">
+                    <div class="output-label">
+                        <i class="fas fa-star text-yellow-400 mr-2"></i>
+                        1. Flipper Zero Hex (10 Digits - EM4100 Manual Add)
+                    </div>
+                    <div class="output-value" id="flipper-hex-output" onclick="copyToClipboard(this.textContent)">
+                    </div>
+                    <div class="highlight-box">
+                        <p class="text-sm text-slate-300 flex items-center gap-2">
+                            <i class="fas fa-lightbulb text-yellow-400"></i>
+                            <strong>How to use:</strong> RFID 125kHz → Add Card → Manual Add → [Hex] mode
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Secondary Outputs Grid -->
+                <div class="grid-responsive mb-8">
+                    <!-- Facility Code -->
+                    <div class="output-container">
+                        <div class="output-label">
+                            <i class="fas fa-tag text-blue-400 mr-2"></i>
+                            2. Facility Code (FC) - 8 Bit
+                        </div>
+                        <div class="output-value" id="facility-code-output" onclick="copyToClipboard(this.textContent)">
+                        </div>
+                        <p class="text-xs text-slate-400 mt-2">Decimal Format</p>
+                    </div>
+
+                    <!-- Card ID -->
+                    <div class="output-container">
+                        <div class="output-label">
+                            <i class="fas fa-id-card text-cyan-400 mr-2"></i>
+                            3. Card ID - 16 Bit
+                        </div>
+                        <div class="output-value" id="card-id-output" onclick="copyToClipboard(this.textContent)">
+                        </div>
+                        <p class="text-xs text-slate-400 mt-2">Decimal Format</p>
+                    </div>
+                </div>
+
+                <!-- Wiegand Raw Data -->
+                <div class="output-container">
+                    <div class="output-label">
+                        <i class="fas fa-code text-indigo-400 mr-2"></i>
+                        4. Wiegand Raw Data Hex (3 Byte / 6 Digits)
+                    </div>
+                    <div class="output-value" id="wiegand-hex-output" onclick="copyToClipboard(this.textContent)">
+                    </div>
+                    <p class="text-xs text-slate-400 mt-2">Pure Hexadecimal Format</p>
+                </div>
+
+                <!-- Information Box -->
+                <div class="mt-12 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/30 rounded-xl p-6 md:p-8">
+                    <h3 class="text-lg font-bold text-white mb-4">
+                        <i class="fas fa-book text-blue-400 mr-2"></i>
+                        Technical Information
+                    </h3>
+                    <div class="feature-list">
+                        <div class="feature-item">
+                            <span class="feature-icon">01</span>
+                            <span>Standard-based <strong>26-bit Wiegand conversion</strong> (8-bit FC / 16-bit Card ID)</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">02</span>
+                            <span>5-byte HEX <strong>format</strong> with a fixed prefix of <strong>1600</strong> for EM4100</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">03</span>
+                            <span>Compatible with <strong>Flipper Zero RFID</strong> "Manual Add" mode</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">04</span>
+                            <span>Raw data can be used for other <strong>26-bit Wiegand</strong> protocols</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer class="mt-16 text-center text-slate-400 text-xs border-t border-slate-700/50 pt-8">
+                <p class="mb-2">
+                    <strong class="text-slate-300">DISCLAIMER:</strong> This conversion is based on the 26-bit Wiegand standard most commonly used by ZKTeco machines.
+                </p>
+                <p class="text-slate-500">
+                    For system security research and development use only. Use responsibly.
+                </p>
+                <p class="mt-4 text-slate-600">
+                    <i class="fas fa-code mr-2"></i>GAMPAR v1.0 © 2025 | ittampan.wordpress.com
+                </p>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Copy Notification -->
+    <div class="copy-notification" id="copyNotification">
+        <i class="fas fa-check-circle mr-2"></i>
+        Copied to clipboard!
+    </div>
+
+    <script>
+        // --- CORE LOGIC MIGRATED FROM PHP TO JAVASCRIPT ---
+
+        // Wait for the DOM to be fully loaded before running scripts
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('converter-form');
+            const cardInput = document.getElementById('zk_card_input');
+            const errorContainer = document.getElementById('error-container');
+            const errorMessageSpan = document.getElementById('error-message');
+            const resultsContainer = document.getElementById('results-container');
+
+            // Output fields
+            const flipperHexOutput = document.getElementById('flipper-hex-output');
+            const facilityCodeOutput = document.getElementById('facility-code-output');
+            const cardIdOutput = document.getElementById('card-id-output');
+            const wiegandHexOutput = document.getElementById('wiegand-hex-output');
+            
+            form.addEventListener('submit', (event) => {
+                // Prevent the default form submission which reloads the page
+                event.preventDefault();
+
+                // Hide previous results and errors
+                errorContainer.classList.add('hidden');
+                resultsContainer.classList.add('hidden');
+
+                const rawInput = cardInput.value;
+
+                // 1. --- VALIDATION ---
+                if (!rawInput || !/^\d+$/.test(rawInput)) {
+                    showError("Masukkan Card Number ZKTeco yang valid (hanya angka).");
+                    return;
+                }
+                
+                // Remove leading zeros for calculation, which parseInt does automatically
+                const decimalValue = parseInt(rawInput, 10);
+                
+                // The maximum value for 24 bits (used in Wiegand 26) is 16,777,215.
+                const MAX_WIEGAND_VALUE = 16777215;
+                if (decimalValue > MAX_WIEGAND_VALUE) {
+                    showError(`Nomor Card terlalu besar. Nilai maksimum Wiegand 26-bit adalah ${MAX_WIEGAND_VALUE.toLocaleString('id-ID')}.`);
+                    return;
+                }
+
+                // 2. --- CORE WIEGAND 26 CALCULATION ---
+                // The constant 65536 is 2^16, used to separate the 8-bit facility code from the 16-bit card ID.
+                const DIVISOR = 65536;
+
+                // Calculate Facility Code (FC)
+                const facilityCode = Math.floor(decimalValue / DIVISOR);
+
+                // Calculate Card ID
+                const cardId = decimalValue % DIVISOR;
+
+                // Calculate Wiegand Hex (3-byte)
+                // Convert decimal to a hex string and pad with leading zeros to ensure it's 6 characters (3 bytes) long.
+                const wiegandHex3Byte = decimalValue.toString(16).toUpperCase().padStart(6, '0');
+                
+                // Calculate Flipper Zero Hex (5-byte) for EM4100
+                // This is typically a fixed 2-byte prefix '1600' followed by the 3-byte Wiegand data.
+                const flipperHex5Byte = '1600' + wiegandHex3Byte;
+
+                // 3. --- DISPLAY RESULTS ---
+                flipperHexOutput.textContent = formatHex(flipperHex5Byte);
+                facilityCodeOutput.textContent = facilityCode;
+                cardIdOutput.textContent = cardId;
+                wiegandHexOutput.textContent = formatHex(wiegandHex3Byte);
+                
+                // Show the results container
+                resultsContainer.classList.remove('hidden');
+            });
+            
+            function showError(message) {
+                errorMessageSpan.textContent = message;
+                errorContainer.classList.remove('hidden');
+            }
+
+            // Helper function to format hex strings with spaces (e.g., 1600AABBCC -> 16 00 AA BB CC)
+            function formatHex(hexString) {
+                return hexString.match(/.{1,2}/g).join(' ');
+            }
+        });
+
+        // --- UTILITY FUNCTIONS ---
+
+        // Function to copy text to the clipboard
+        function copyToClipboard(text) {
+            // Remove spaces for clean copy
+            const cleanText = text.trim().replace(/\s+/g, '');
+            navigator.clipboard.writeText(cleanText).then(() => {
+                const notification = document.getElementById('copyNotification');
+                notification.classList.add('show');
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+                // As a fallback for older browsers or secure contexts, you could use a modal to show the text for manual copy.
+                // For this application, a console error is sufficient.
+            });
+        }
+    </script>
+</body>
+</html>
