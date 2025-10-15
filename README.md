@@ -64,7 +64,7 @@ Karena aplikasi ini sepenuhnya mandiri, Anda hanya perlu:
 
 1.  Kloning repositori ini atau unduh file `gampar_converter.html`.
     
-2.  Buka file `gampar_converter.html` langsung di peramban web modern apa pun (Chrome, Firefox, Safari, Edge, dll.).
+2.  Buka file `gampar_converter.html` langsung di browser apa pun (Chrome, Firefox, Safari, Edge, dll.).
     
 3.  Aplikasi siap digunakan.
     
