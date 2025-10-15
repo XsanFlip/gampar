@@ -2,6 +2,8 @@
 
 **GAMPAR (Ghosted Access Multi-protocol Proximity And RFID)** adalah sebuah _tool_ berbasis web yang dirancang untuk mengonversi nomor kartu desimal (DEC-10) dari sistem ZKTeco menjadi format Heksadesimal (HEX) 5-byte yang kompatibel dengan Flipper Zero untuk emulasi kartu RFID EM4100.
 
+<img width="1280" height="636" alt="Screenshot_2025-10-15_10_19_56" src="https://github.com/user-attachments/assets/35820d66-1157-4195-be2a-3465d6d267e9" />
+
 ## ✨ Fitur Utama
 
 -   **Konversi Instan**: Mengubah nomor kartu ZKTeco (Wiegand 26-bit) menjadi beberapa format output secara cepat.
